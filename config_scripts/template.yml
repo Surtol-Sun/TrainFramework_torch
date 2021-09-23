@@ -1,0 +1,26 @@
+# Configuration file description:
+# Parameters that not listed in this template are all self-defined or optional
+
+
+device: 'cuda:0'                 # 'cpu' when cuda not available, else 'cuda:0'
+model_config:
+  model_name: 'unet3d'          # Name of the model
+  checkpoint_path: null         # Path to load from saved checkpoints. Enter 'null' when train from scratch
+  loss_name: 'Dice'
+dataset_config:
+  loader_name: 'collagen3d_dataset'      # Name of the dataset loader
+
+  # Below are self-defined parameters used by 'cifar10'
+  #dataset_path: 'E:\20210911CollagenFiber'
+  dataset_path: '/home/yxsun/win_data/20210911CollagenFiber'
+  train_batch_size: 8
+  val_batch_size: 8
+train_config:
+  strategy_name: 'regular'   # Strategy for training
+
+  # Below are self-defined parameters used by 'regular'
+  max_epoch: 100              # Maximum epoch
+  print_freq: 2             # Print log every several iterations
+  learning_rate: 0.01         # Learning rate
+
+
