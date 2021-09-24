@@ -1,6 +1,7 @@
 # Supported model
 import components.models.smp as smp
 from components.models.unet3d.model import UNet3D
+from components.models.tscnet.model_step2 import TSCNetStep2
 supported_model_dict = {
     'unet2d': smp.Unet(
         encoder_name='resnet18',        # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
@@ -18,6 +19,10 @@ supported_model_dict = {
         in_channels=2,                  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
         classes=1,                      # model output channels (number of classes in your dataset)
     ),
+    'TSCNetStep2': TSCNetStep2(
+        in_channels=2,
+        out_channels=1,
+    )
 }
 
 # Supported loss
@@ -26,7 +31,7 @@ from components.losses.dice import DiceLoss
 supported_loss_dict = {
     'Dice': DiceLoss(mode='multilabel'),
     'CrossEntropy': torch.nn.CrossEntropyLoss(),
-    'MSE': torch.nn.MSELoss(reduce=True, size_average=True),
+    'MSE': torch.nn.MSELoss(reduction='mean'),
 }
 
 # Supported data loader

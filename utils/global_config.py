@@ -2,7 +2,7 @@ import time
 
 use_cuda = False
 time_now = time.strftime('%Y%m%d-%H%M%S')
-log_file = open(f'results/logs/log-{time_now}.log', 'w')
+log_file_name = f'results/logs/log-{time_now}.log'
 checkpoint_path = f'results/checkpoints/checkpoint-{time_now}.pth'
 
 
@@ -23,4 +23,13 @@ def set_use_cuda(value):
     global use_cuda
     use_cuda = value
     return use_cuda
+
+
+def get_log_file_name():
+    global log_file_name
+    return log_file_name
+
+def get_checkpoint_path():
+    global checkpoint_path
+    return checkpoint_path
 

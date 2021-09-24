@@ -2,7 +2,7 @@ import time
 import torch
 
 from utils.utils import print_log, AverageMeter, time_string
-from utils.global_config import checkpoint_path, get_use_cuda
+from utils.global_config import get_checkpoint_path, get_use_cuda
 
 
 class RegularTrain:
@@ -16,7 +16,7 @@ class RegularTrain:
         # global use_cuda
         self.epoch = 0
         self.use_cuda = get_use_cuda()
-        self.checkpoint_path = checkpoint_path
+        self.checkpoint_path = get_checkpoint_path()
 
         self.model = model
         self.criterion = criterion

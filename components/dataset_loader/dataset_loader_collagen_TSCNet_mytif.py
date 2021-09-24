@@ -1,8 +1,8 @@
 import os
 import torch
 import numpy as np
-from PIL import Image
 from skimage import io
+from utils.utils import _normalization
 
 # This dataset comes form my self-collection
 # One folder contains some 3D tif files
@@ -43,7 +43,7 @@ class _DatasetLD(torch.utils.data.Dataset):
                 continue
             img_file = io.imread(os.path.join(data_path, file_name))
             for i in range(img_file.shape[0]):
-                self.image_files.append(img_file[i])
+                self.image_files.append(_normalization(img_file[i], dtype=np.float32))
                 if i >= 2:
                     index_base = len(self.image_files)
                     self.img_path.append([index_base-3, index_base-2, index_base-1])
@@ -95,7 +95,6 @@ class _DatasetLD(torch.utils.data.Dataset):
             img_list.append(img)
         img_array = self._inner_rand_cut(np.array(img_list), (len(img_list),) + (1, 512, 512))  # [img, C. H, W]
 
-        img_array = np.array(img_array/255., dtype=np.float32)
         if self.transform is not None:
             img_array = self.transform(img_array)
         img1, img2, img3 = img_array

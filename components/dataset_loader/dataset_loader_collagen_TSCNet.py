@@ -2,6 +2,7 @@ import os
 import torch
 import numpy as np
 from PIL import Image
+from utils.utils import _normalization
 
 # This dataset comes form paper:
 # [2D and 3D Segmentation of Uncertain Local Collagen Fiber Orientations in SHG Microscopy]
@@ -105,7 +106,7 @@ class _DatasetLD(torch.utils.data.Dataset):
             img_list.append(img)
         img_array = self._inner_rand_cut(np.array(img_list), (len(img_list),) + (1, 512, 512))  # [img, C. H, W]
 
-        img_array = np.array(img_array/255., dtype=np.float32)
+        img_array = _normalization(img_in=img_array, dtype=np.float32)
         if self.transform is not None:
             img_array = self.transform(img_array)
         img1, img2, img3 = img_array
