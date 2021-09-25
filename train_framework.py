@@ -15,7 +15,7 @@ def main():
     config = load_config(args.config)
     use_cuda = False if str(config['device']) == 'cpu' else True
     set_use_cuda(use_cuda)
-    print(f'Use cuda: {str(use_cuda)}')
+    print_log(f'Use cuda: {str(use_cuda)}')
 
     # Load model ----------------------------------------------------------------------------------
     model_config = config['model_config']

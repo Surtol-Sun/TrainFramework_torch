@@ -5,6 +5,9 @@ from utils.global_config import *
 
 import time
 import torch
+import numpy as np
+
+
 import sys
 import shutil
 
@@ -13,11 +16,18 @@ import importlib
 
 # import h5py
 # import matplotlib.pyplot as plt
-import numpy as np
 from torch import optim
 
 
 def load_config(config_file_path=''):
+    # Record configure information into log file
+    print_log(f'=========Configuration file: {config_file_path}')
+    for line_text in open(config_file_path, 'r', encoding='utf-8'):
+        line_text = line_text.strip('\n\r')
+        print_log(line_text)
+    print_log(f'=========')
+
+    # Fetch configuration
     config = yaml.safe_load(open(config_file_path, 'r', encoding='utf-8'))
     # Get a device to train on
     device_str = config.get('device', None)
@@ -44,7 +54,7 @@ def time_string():
 
 def print_log(print_string):
     log_file_name = get_log_file_name()
-    with open(log_file_name, 'w') as log_file:
+    with open(log_file_name, 'w+') as log_file:
         print("{:}".format(print_string))
         log_file.write('{:}\n'.format(print_string))
         log_file.flush()
