@@ -54,7 +54,7 @@ def time_string():
 
 def print_log(print_string):
     log_file_name = get_log_file_name()
-    with open(log_file_name, 'w+') as log_file:
+    with open(log_file_name, 'a+') as log_file:
         print("{:}".format(print_string))
         log_file.write('{:}\n'.format(print_string))
         log_file.flush()

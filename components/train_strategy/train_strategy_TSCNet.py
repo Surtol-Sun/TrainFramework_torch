@@ -53,9 +53,11 @@ class TrainTSCNet:
         :return:
         '''
         assert mode in ['train', 'evaluate']
+        lambda_gd = 0.2  # Hyper parameter for generator and discriminator loss
         batch_time = AverageMeter()
         data_time = AverageMeter()
         losses = AverageMeter()
+        losses_dis = AverageMeter()
         metric_avg_dict = {}
         for metric_name in self.evaluate_metric_dict.keys():
             metric_avg_dict[metric_name] = AverageMeter()
@@ -92,11 +94,16 @@ class TrainTSCNet:
             img1_5 = self.model(torch.cat([img1_var, img2_var], 1))  # Contact 2 images
             img2_5 = self.model(torch.cat([img2_var, img3_var], 1))  # Contact 2 images
             output = self.model(torch.cat([img1_5, img2_5], 1))  # Contact 2 images
-            loss = self.criterion(output, img2_var)
+            real_img = self.model.discriminator(img2)
+            fake_img = self.model.discriminator(output)
+
+            loss_discriminator = 1 - real_img.mean() + fake_img.mean()
+            loss = self.criterion(output, img2_var) - lambda_gd * fake_img.mean()
 
             # compute gradient and do SGD step
             if mode == 'train':
-                loss.backward()
+                loss.backward(retain_graph=True)
+                loss_discriminator.backward(retain_graph=True)
                 self.optimizer.step()
 
             # Evaluate model
@@ -107,6 +114,7 @@ class TrainTSCNet:
 
             # Record results and time
             losses.update(loss.data.item(), output.size(0))
+            losses_dis.update(loss_discriminator.data.item(), output.size(0))
             data_time.update(time_middle_1 - start_time)
             batch_time.update(time.time() - start_time)
             start_time = time.time()
@@ -116,6 +124,7 @@ class TrainTSCNet:
                 print_str = f'=={mode}== '
                 print_str += f'Epoch[{self.epoch}]: [{i}/{len(self.train_loader)}]\t'
                 print_str += f'Loss {losses.avg:.4f}\t'
+                print_str += f'LossDis {losses_dis.avg:.4f}\t'
                 print_str += f'Time {batch_time.avg:.3f}\t'
                 print_str += f'Data {data_time.avg:.3f}\t'
                 if mode == 'evaluate':
