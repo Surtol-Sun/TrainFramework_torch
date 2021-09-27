@@ -7,7 +7,7 @@ def mse(output, target):
     :param target: Ground truth
     :return: Mean squared error between
     '''
-    return torch.std(output-target).float()
+    return torch.pow(output-target, 2).mean().float()
 
 
 

@@ -35,10 +35,12 @@ def main():
 
     if use_cuda:
         model = model.cuda()
+    model = model.eval()
+    # model = model.train()
 
     # Generate result -------------------------------------------------------------------------------
     from skimage import io
-    data_tif = io.imread(r'/home/yxsun/win_data/20210715纤维样本3D/T-AF-300-3D/CellVideo/AVG_CellVideo 0.tif')
+    data_tif = io.imread(r'/home/yxsun/win_data/20210924TSCNet_test/AVG_CellVideo 0.tif')
 
     # result_list = []
     # with torch.no_grad():
@@ -61,7 +63,7 @@ def main():
 
     result_list = []
     with torch.no_grad():
-        for i in range(data_tif.shape[0] - 2):
+        for i in range(data_tif.shape[0] - 2, 2):
             # img1 = np.reshape(data_tif[i], data_tif[i].shape + (1,))
             # img2 = np.reshape(data_tif[i+1], data_tif[i+1].shape + (1,))
 
@@ -77,9 +79,16 @@ def main():
             output1 = model(img1_5)
             output2 = model(img2_5)
             output = model(torch.cat([output1, output2], 1))
+            
+            result_list.append(img1)
+            result_list.append(np.squeeze(output1.cpu().numpy()))
+            result_list.append(img2)
+            result_list.append(np.squeeze(output2.cpu().numpy()))
 
-            mse = np.std(np.squeeze(output.cpu().numpy()) - img2)
+            mse = np.mean(np.power(np.squeeze(output.cpu().numpy()) - img2, 2))
             print_log(f'mse={mse}')
+        result_list.append(_normalization(data_tif[-1], dtype=np.float32))
+        # io.imsave('aaa.tif', np.array(result_list))
 
 
 

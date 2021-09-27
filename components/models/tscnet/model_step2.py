@@ -117,24 +117,25 @@ class Discriminator(nn.Module):
             nn.BatchNorm2d(128),
             nn.LeakyReLU(0.2),
 
-            nn.Conv2d(128, 256, kernel_size=(3, 3), padding=1),
-            nn.BatchNorm2d(256),
-            nn.LeakyReLU(0.2),
-
-            nn.Conv2d(256, 256, kernel_size=(3, 3), stride=(2, 2), padding=1),
-            nn.BatchNorm2d(256),
-            nn.LeakyReLU(0.2),
-
-            nn.Conv2d(256, 512, kernel_size=(3, 3), padding=1),
-            nn.BatchNorm2d(512),
-            nn.LeakyReLU(0.2),
-
-            nn.Conv2d(512, 512, kernel_size=(3, 3), stride=(2, 2), padding=1),
-            nn.BatchNorm2d(512),
-            nn.LeakyReLU(0.2),
+            # nn.Conv2d(128, 256, kernel_size=(3, 3), padding=1),
+            # nn.BatchNorm2d(256),
+            # nn.LeakyReLU(0.2),
+            #
+            # nn.Conv2d(256, 256, kernel_size=(3, 3), stride=(2, 2), padding=1),
+            # nn.BatchNorm2d(256),
+            # nn.LeakyReLU(0.2),
+            #
+            # nn.Conv2d(256, 512, kernel_size=(3, 3), padding=1),
+            # nn.BatchNorm2d(512),
+            # nn.LeakyReLU(0.2),
+            #
+            # nn.Conv2d(512, 512, kernel_size=(3, 3), stride=(2, 2), padding=1),
+            # nn.BatchNorm2d(512),
+            # nn.LeakyReLU(0.2),
 
             nn.AdaptiveAvgPool2d(1),
-            nn.Conv2d(512, 1024, kernel_size=(1, 1)),
+            # nn.Conv2d(512, 1024, kernel_size=(1, 1)),
+            nn.Conv2d(128, 1024, kernel_size=(1, 1)),
             nn.LeakyReLU(0.2),
             nn.Conv2d(1024, 1, kernel_size=(1, 1))
         )
@@ -157,10 +158,10 @@ class AbstractTSCNetStep2(nn.Module):
         self.in_channels = in_channels // 2
         self.out_channels = out_channels
 
-        self.rdn1 = RDN(scale_factor=1, in_channels=self.in_channels, out_channels=self.in_channels, num_features=self.in_channels, growth_rate=1, num_blocks=3, num_layers=3)
-        self.rdn2 = RDN(scale_factor=1, in_channels=self.in_channels, out_channels=self.in_channels, num_features=self.in_channels, growth_rate=1, num_blocks=3, num_layers=3)
+        self.rdn1 = RDN(scale_factor=1, in_channels=self.in_channels, out_channels=self.in_channels, num_features=self.in_channels, growth_rate=1, num_blocks=3, num_layers=8)
+        self.rdn2 = RDN(scale_factor=1, in_channels=self.in_channels, out_channels=self.in_channels, num_features=self.in_channels, growth_rate=1, num_blocks=3, num_layers=8)
 
-        self.rdn3 = RDN(scale_factor=1, in_channels=self.in_channels*2, out_channels=self.out_channels, num_features=self.in_channels, growth_rate=1, num_blocks=3, num_layers=3)
+        self.rdn3 = RDN(scale_factor=1, in_channels=self.in_channels*2, out_channels=self.out_channels, num_features=self.in_channels, growth_rate=1, num_blocks=3, num_layers=8)
 
         self.discriminator = Discriminator(in_channels=out_channels)
 

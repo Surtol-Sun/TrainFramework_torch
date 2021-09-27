@@ -114,7 +114,7 @@ class TrainTSCNet:
 
             # Record results and time
             losses.update(loss.data.item(), output.size(0))
-            losses_dis.update(loss_discriminator.data.item(), output.size(0))
+            losses_dis.update(fake_img.mean().data.item(), output.size(0))
             data_time.update(time_middle_1 - start_time)
             batch_time.update(time.time() - start_time)
             start_time = time.time()
