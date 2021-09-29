@@ -43,18 +43,40 @@ def main():
                                 weight_decay=1e-4,  # ToDo!!!!!!!!!!!!
                                 nesterov=True)
 
-    # Data loading code -----------------------------------------------------------------------------
-    dataset_config = config['dataset_config']
-    dataloader = supported_dataloader_dict[dataset_config['loader_name']]
-    train_loader, val_loader = dataloader(dataset_config)
+    while True:
+        # Data loading code -------------------------------------------------------------------------
+        dataset_config = config['dataset_config']
+        dataloader = supported_dataloader_dict[dataset_config['loader_name']]
+        train_loader, val_loader = dataloader(dataset_config)
 
-    # Train strategy --------------------------------------------------------------------------------
-    train_config = config['train_config']
-    train_strategy = supported_training_strategy_dict[train_config['strategy_name']](
-        model, criterion, optimizer, train_loader, train_config)
+        # Train strategy ----------------------------------------------------------------------------
+        train_config = config['train_config']
+        train_strategy = supported_training_strategy_dict[train_config['strategy_name']](
+            model, criterion, optimizer, train_loader, train_config)
 
-    # Train -----------------------------------------------------------------------------------------
-    train_strategy.train()
+        # Train -------------------------------------------------------------------------------------
+        train_successfully = True
+        try:
+            train_strategy.train()
+        except RuntimeError as e:
+            train_successfully = False
+            if 'CUDA out of memory' in str(e):
+                train_batch_size = config['dataset_config']['train_batch_size']
+                print_log(f'Train batch = {train_batch_size}, {str(e)}')
+                if train_batch_size > 1:
+                    config['dataset_config']['train_batch_size'] -= 1
+                    print_log(f'Change train batch size to {train_batch_size-1}')
+                else:
+                    print_log('Failed, no enough CUDA memory')
+                    break
+            else:
+                print_log(f'Unexpected error {str(e)}')
+                break
+
+        if train_successfully:
+            break
+    print_log('------------------------ END ------------------------')
+
 
 
 if __name__ == '__main__':
