@@ -55,21 +55,15 @@ class _DatasetLD(torch.utils.data.Dataset):
     def _inner_rand_cut(img_in, cut_shape):
         shape_len = len(img_in.shape)
         for i, axis_len in enumerate(img_in.shape):
-            cut_len = axis_len-cut_shape[i]
-            if cut_len <= 0:
+            loc = locals()
+            if axis_len-cut_shape[i] <= 0:
                 continue
-            cut_start = np.random.randint(0, cut_len)
+            cut_start = np.random.randint(0, axis_len-cut_shape[i])
 
             # img_in = img_in[cut_start:cut_start+cut_len]
-            exe_script = f'img_in['
-            for _ in range(i):
-                exe_script += ':,'
-            exe_script += 'cut_start:cut_start+cut_len,'
-            for _ in range(shape_len-i-1):
-                exe_script += ':,'
-            exe_script += ']'
-
-            exec(exe_script, {'img_in': img_in, 'cut_start': cut_start, 'cut_len': cut_len})
+            exe_script = f'img_in=img_in[{":,"*i}cut_start:cut_start+cut_len,{":,"*(shape_len-i-1)}]'
+            exec(exe_script, {'img_in': img_in, 'cut_start': cut_start, 'cut_len': cut_shape[i]}, loc)
+            img_in = loc['img_in']
         return img_in
 
     @staticmethod
@@ -93,7 +87,7 @@ class _DatasetLD(torch.utils.data.Dataset):
             img = self.image_files[image_index]
             img = np.reshape(img, (1,) + img.shape)  # Convert gray image into [C, H, W] mode
             img_list.append(img)
-        img_array = self._inner_rand_cut(np.array(img_list), (len(img_list),) + (1, 512, 512))  # [img, C. H, W]
+        img_array = self._inner_rand_cut(np.array(img_list), (len(img_list),) + (1, 64, 64))  # [img, C. H, W]
 
         if self.transform is not None:
             img_array = self.transform(img_array)
