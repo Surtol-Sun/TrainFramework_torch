@@ -87,7 +87,7 @@ class _DatasetLD(torch.utils.data.Dataset):
             img = self.image_files[image_index]
             img = np.reshape(img, (1,) + img.shape)  # Convert gray image into [C, H, W] mode
             img_list.append(img)
-        img_array = self._inner_rand_cut(np.array(img_list), (len(img_list),) + (1, 64, 64))  # [img, C. H, W]
+        img_array = self._inner_rand_cut(np.array(img_list), (len(img_list),) + (1, 64, 64))  # [img, C, H, W]
 
         if self.transform is not None:
             img_array = self.transform(img_array)

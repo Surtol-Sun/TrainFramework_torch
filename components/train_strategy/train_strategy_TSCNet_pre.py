@@ -4,9 +4,13 @@ import torch
 from utils.utils import print_log, AverageMeter, time_string
 from utils.global_config import get_checkpoint_path, get_use_cuda
 
+'''
+Pre-training for TSCNet
+'''
 
-class TrainTSCNet:
-    def __init__(self, model, criterion, train_loader, val_loader, train_config):
+
+class TrainTSCNet_pre:
+    def __init__(self, model, train_loader, val_loader, train_config):
         '''
         :param model:
         :param train_config: Should contain the following keys:
@@ -19,7 +23,6 @@ class TrainTSCNet:
         self.checkpoint_path = get_checkpoint_path()
 
         self.model = model
-        self.criterion = criterion
         self.train_loader = train_loader
         self.val_loader = val_loader
         self.print_freq = train_config['print_freq']
@@ -61,8 +64,7 @@ class TrainTSCNet:
             self.model.train()
             data_loader = self.train_loader
         elif mode == 'evaluate':
-            # self.model.eval()  # ToDo !!!
-            self.model.train()
+            self.model.eval()
             data_loader = self.val_loader
         else:
             data_loader = None
@@ -87,30 +89,31 @@ class TrainTSCNet:
             self.optimizer.zero_grad()
             img1_5 = self.model(torch.cat([img1_var, img2_var], 1))  # Contact 2 images
             img2_5 = self.model(torch.cat([img2_var, img3_var], 1))  # Contact 2 images
-            output = self.model(torch.cat([img1_5, img2_5], 1))  # Contact 2 images
-            out_discriminator = self.model.discriminator(output)
-            output = torch.autograd.Variable(output)
+            img1_5_self_define = (img1_var + img2_var) / 2.
+            img2_5_self_define = (img2_var + img3_var) / 2.
 
             if i == 0:
                 from skimage.io import imsave
-                imsave(f'results/images/{self.epoch}.tif', output.detach().to('cpu').numpy())
+                imsave(f'results/images/{self.epoch}.tif', img1_5.detach().to('cpu').numpy())
 
-            # Train Generator
-            lambda_gd = 0.2  # Hyper parameter for generator and discriminator loss
-            # loss_cross = -(1.0 * torch.log(out_discriminator.mean()) + 0.0 * torch.log(1.0-out_discriminator.mean()))
-            loss_cross = 1.0 - out_discriminator.mean()
-            loss = self.criterion(output, img2_var) + lambda_gd * loss_cross
-            if mode == 'train' and losses_d.avg < 0.5:
+            from utils.supported_items import supported_loss_dict
+            loss = supported_loss_dict['MSE'](img1_5, img1_5_self_define) + \
+                   supported_loss_dict['MSE'](img2_5, img2_5_self_define)
+            if mode == 'train':
                 loss.backward()
                 self.optimizer.step()
                 self.schedule.step()
 
             # Train Discriminator
             self.optimizer_d.zero_grad()
-            real_img = self.model.discriminator(img2_var)
-            fake_img = self.model.discriminator(output)
-            loss_discriminator = 1 - real_img.mean() + fake_img.mean()
-            if mode == 'train' and losses_d.avg > 0.2:
+            img1_5 = self.model(torch.cat([img1_var, img2_var], 1))  # Contact 2 images
+            img2_5 = self.model(torch.cat([img2_var, img3_var], 1))  # Contact 2 images
+            real_img1_5 = self.model.discriminator(img1_5_self_define)
+            real_img2_5 = self.model.discriminator(img2_5_self_define)
+            fake_img1_5 = self.model.discriminator(img1_5)
+            fake_img2_5 = self.model.discriminator(img2_5)
+            loss_discriminator = 1 + 0.5 * (fake_img1_5.mean() + fake_img2_5.mean() - real_img1_5.mean() - real_img2_5.mean())
+            if mode == 'train':
                 loss_discriminator.backward()
                 self.optimizer_d.step()
                 self.schedule_d.step()
@@ -118,12 +121,12 @@ class TrainTSCNet:
             # Evaluate model
             if mode == 'evaluate':
                 for metric_name, metric_func in self.evaluate_metric_dict.items():
-                    result = metric_func(output.data, img2)
+                    result = metric_func(img1_5.data, img1_5_self_define.data)
                     metric_avg_dict[metric_name].update(result)
 
             # Record results and time
-            losses.update(loss.data.item(), output.size(0))
-            losses_d.update(loss_discriminator.data.item(), output.size(0))
+            losses.update(loss.data.item(), img1_5.size(0))
+            losses_d.update(loss_discriminator.data.item(), img1_5.size(0))
             data_time.update(time_middle_1 - start_time)
             batch_time.update(time.time() - start_time)
             start_time = time.time()
@@ -155,7 +158,6 @@ class TrainTSCNet:
             if self.epoch > self.max_epoch:
                 print_log('Max epoch reached')
                 break
-            self.adjust_learning_rate(epoch_start=0, reduce_epoch=300)
             print_log(f'Epoch {self.epoch :3d}/{ self.max_epoch :3d} ----- [{time_string():s}]')
 
             # train for one epoch and evaluate

@@ -3,7 +3,7 @@ import argparse
 
 from utils.global_config import *
 from utils.utils import load_config, set_use_cuda, print_log
-from utils.supported_items import supported_loss_dict, supported_model_dict, supported_dataloader_dict, supported_training_strategy_dict
+from utils.supported_items import supported_model_dict, supported_dataloader_dict, supported_training_strategy_dict
 
 
 parser = argparse.ArgumentParser(description='3D Segmentation')
@@ -30,18 +30,9 @@ def main():
         model.load_state_dict(checkpoint['state_dict'])
         config['train_config']['epoch'] = checkpoint['epoch']
 
-    # Define loss function (criterion) and optimizer ------------------------------------------------
+    # Define loss function (criterion) --------------------------------------------------------------
     if use_cuda:
         model = model.cuda()
-        criterion = supported_loss_dict[model_config['loss_name']]
-        criterion = criterion.cuda()
-    else:
-        criterion = supported_loss_dict[model_config['loss_name']]
-
-    optimizer = torch.optim.SGD(model.parameters(), 0.01,  # ToDo!!!!!!!!!!!!!
-                                momentum=0.9,  # ToDo!!!!!!!!!!!!!
-                                weight_decay=1e-4,  # ToDo!!!!!!!!!!!!
-                                nesterov=True)
 
     while True:
         # Data loading code -------------------------------------------------------------------------
@@ -52,7 +43,7 @@ def main():
         # Train strategy ----------------------------------------------------------------------------
         train_config = config['train_config']
         train_strategy = supported_training_strategy_dict[train_config['strategy_name']](
-            model, criterion, optimizer, train_loader, train_config)
+            model, train_loader, val_loader, train_config)
 
         # Train -------------------------------------------------------------------------------------
         train_successfully = True
@@ -70,7 +61,8 @@ def main():
                     print_log('Failed, no enough CUDA memory')
                     break
             else:
-                print_log(f'Unexpected error {str(e)}')
+                print_log(f'Unexpected error:')
+                print_log(f'{str(e)}')
                 break
 
         if train_successfully:

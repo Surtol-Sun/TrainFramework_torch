@@ -10,6 +10,7 @@ class DenseLayer(nn.Module):
         super(DenseLayer, self).__init__()
         self.conv = nn.Conv2d(in_channels, out_channels, kernel_size=(3, 3), padding=3 // 2)
         self.relu = nn.ReLU(inplace=True)
+        # self.relu = nn.LeakyReLU(inplace=True)  # Modified here
 
     def forward(self, x):
         return torch.cat([x, self.relu(self.conv(x))], 1)
@@ -25,7 +26,7 @@ class RDB(nn.Module):
 
         # local feature fusion
         # self.lff = nn.Conv2d(in_channels + growth_rate * num_layers, growth_rate, kernel_size=(1, 1))
-        self.lff = nn.Conv2d(in_channels + growth_rate * num_layers, in_channels, kernel_size=(1, 1))  # Modified
+        self.lff = nn.Conv2d(in_channels + growth_rate * num_layers, max(growth_rate, in_channels), kernel_size=(1, 1))  # Modified
 
     def forward(self, x):
         return x + self.lff(self.layers(x))  # local residual learning
@@ -52,7 +53,7 @@ class RDN(nn.Module):
         # residual dense blocks
         self.rdbs = nn.ModuleList([RDB(self.G0, self.G, self.C)])
         for _ in range(self.D - 1):
-            self.rdbs.append(RDB(self.G, self.G, self.C))
+            self.rdbs.append(RDB(max(self.G, self.G0), self.G, self.C))
 
         # global feature fusion
         self.gff = nn.Sequential(
@@ -102,21 +103,21 @@ class Discriminator(nn.Module):
     def __init__(self, in_channels):
         super(Discriminator, self).__init__()
         self.net = nn.Sequential(
-            nn.Conv2d(in_channels, 64, kernel_size=(3, 3), padding=1),
-            nn.LeakyReLU(0.2),
-
-            nn.Conv2d(64, 64, kernel_size=(3, 3), stride=(2, 2), padding=1),
-            nn.BatchNorm2d(64),
-            nn.LeakyReLU(0.2),
-
-            nn.Conv2d(64, 128, kernel_size=(3, 3), padding=1),
-            nn.BatchNorm2d(128),
-            nn.LeakyReLU(0.2),
-
-            nn.Conv2d(128, 128, kernel_size=(3, 3), stride=(2, 2), padding=1),
-            nn.BatchNorm2d(128),
-            nn.LeakyReLU(0.2),
-
+            # nn.Conv2d(in_channels, 64, kernel_size=(3, 3), padding=1),
+            # nn.LeakyReLU(0.2),
+            #
+            # nn.Conv2d(64, 64, kernel_size=(3, 3), stride=(2, 2), padding=1),
+            # nn.BatchNorm2d(64),
+            # nn.LeakyReLU(0.2),
+            #
+            # nn.Conv2d(64, 128, kernel_size=(3, 3), padding=1),
+            # nn.BatchNorm2d(128),
+            # nn.LeakyReLU(0.2),
+            #
+            # nn.Conv2d(128, 128, kernel_size=(3, 3), stride=(2, 2), padding=1),
+            # nn.BatchNorm2d(128),
+            # nn.LeakyReLU(0.2),
+            #
             # nn.Conv2d(128, 256, kernel_size=(3, 3), padding=1),
             # nn.BatchNorm2d(256),
             # nn.LeakyReLU(0.2),
@@ -132,17 +133,73 @@ class Discriminator(nn.Module):
             # nn.Conv2d(512, 512, kernel_size=(3, 3), stride=(2, 2), padding=1),
             # nn.BatchNorm2d(512),
             # nn.LeakyReLU(0.2),
+            #
+            # nn.AdaptiveAvgPool2d(1),
+            # nn.Conv2d(512, 1024, kernel_size=(1, 1)),
+            # nn.LeakyReLU(0.2),
+            # nn.Conv2d(1024, 1, kernel_size=(1, 1))
+
+            nn.Conv2d(in_channels, 64, kernel_size=(3, 3), padding=1),
+            nn.LeakyReLU(0.2),
+
+            nn.Conv2d(64, 64, kernel_size=(3, 3), stride=(2, 2), padding=1),
+            nn.BatchNorm2d(64),
+            nn.LeakyReLU(0.2),
+
+            nn.Conv2d(64, 128, kernel_size=(3, 3), padding=1),
+            nn.BatchNorm2d(128),
+            nn.LeakyReLU(0.2),
+
+            nn.Conv2d(128, 128, kernel_size=(3, 3), stride=(2, 2), padding=1),
+            nn.BatchNorm2d(128),
+            nn.LeakyReLU(0.2),
+
+            nn.Conv2d(128, 256, kernel_size=(3, 3), padding=1),
+            nn.BatchNorm2d(256),
+            nn.LeakyReLU(0.2),
+
+            nn.Conv2d(256, 256, kernel_size=(3, 3), stride=(2, 2), padding=1),
+            nn.BatchNorm2d(256),
+            nn.LeakyReLU(0.2),
 
             nn.AdaptiveAvgPool2d(1),
-            # nn.Conv2d(512, 1024, kernel_size=(1, 1)),
-            nn.Conv2d(128, 1024, kernel_size=(1, 1)),
+            nn.Conv2d(256, 256, kernel_size=(1, 1)),
             nn.LeakyReLU(0.2),
-            nn.Conv2d(1024, 1, kernel_size=(1, 1))
+            nn.Conv2d(256, 1, kernel_size=(1, 1))
         )
 
     def forward(self, x):
         batch_size = x.size(0)
         return torch.sigmoid(self.net(x).view(batch_size))
+
+
+class Generator(nn.Module):
+    """
+    Base class for Step2 of TSCNet proposed in
+    Lu, Z., et al. (2021). "Two-Stage Self-Supervised Cycle-Consistency Network for Reconstruction of Thin-Slice MR Images." arXiv e-prints: arXiv:2106.15395.
+    """
+
+    def __init__(self, in_channels, out_channels):
+        super(Generator, self).__init__()
+
+        assert in_channels % 2 == 0, f'in_channels % 2 should be 0, got in_channels={in_channels} instead'
+        self.in_channels = in_channels // 2
+        self.out_channels = out_channels
+
+        self.rdn1 = RDN(scale_factor=1, in_channels=self.in_channels, out_channels=self.in_channels, num_features=self.in_channels, growth_rate=4, num_blocks=8, num_layers=16)
+        self.rdn2 = RDN(scale_factor=1, in_channels=self.in_channels, out_channels=self.in_channels, num_features=self.in_channels, growth_rate=4, num_blocks=8, num_layers=16)
+
+        self.rdn3 = RDN(scale_factor=1, in_channels=self.in_channels*2, out_channels=self.out_channels, num_features=self.in_channels, growth_rate=4, num_blocks=3, num_layers=3)
+
+        self.discriminator = Discriminator(in_channels=out_channels)
+
+    def forward(self, x):
+        x1, x2 = torch.chunk(x, 2, dim=1)  # split channels
+        x1 = self.rdn1(x1)
+        x2 = self.rdn2(x2)
+
+        output = self.rdn3(torch.cat([x1, x2], dim=1))
+        return output
 
 
 class AbstractTSCNetStep2(nn.Module):
@@ -155,23 +212,11 @@ class AbstractTSCNetStep2(nn.Module):
         super(AbstractTSCNetStep2, self).__init__()
 
         assert in_channels % 2 == 0, f'in_channels % 2 should be 0, got in_channels={in_channels} instead'
-        self.in_channels = in_channels // 2
-        self.out_channels = out_channels
-
-        self.rdn1 = RDN(scale_factor=1, in_channels=self.in_channels, out_channels=self.in_channels, num_features=self.in_channels, growth_rate=1, num_blocks=3, num_layers=8)
-        self.rdn2 = RDN(scale_factor=1, in_channels=self.in_channels, out_channels=self.in_channels, num_features=self.in_channels, growth_rate=1, num_blocks=3, num_layers=8)
-
-        self.rdn3 = RDN(scale_factor=1, in_channels=self.in_channels*2, out_channels=self.out_channels, num_features=self.in_channels, growth_rate=1, num_blocks=3, num_layers=8)
-
+        self.generator = Generator(in_channels=in_channels, out_channels=out_channels)
         self.discriminator = Discriminator(in_channels=out_channels)
 
     def forward(self, x):
-        x1, x2 = torch.chunk(x, 2, dim=1)  # split channels
-        x1 = self.rdn1(x1)
-        x2 = self.rdn2(x2)
-
-        output = self.rdn3(torch.cat([x1, x2], dim=1))
-        return output
+        return self.generator(x)
 
 
 class TSCNetStep2(AbstractTSCNetStep2):

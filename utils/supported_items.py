@@ -52,9 +52,11 @@ supported_dataloader_dict = {
 # Supported training strategy
 from components.train_strategy.train_strategy import RegularTrain
 from components.train_strategy.train_strategy_TSCNet import TrainTSCNet
+from components.train_strategy.train_strategy_TSCNet_pre import TrainTSCNet_pre
 supported_training_strategy_dict = {
     'regular': RegularTrain,
     'TrainTSCNet': TrainTSCNet,
+    'TrainTSCNet_pre': TrainTSCNet_pre,
 }
 
 
