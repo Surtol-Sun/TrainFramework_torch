@@ -25,7 +25,6 @@ def main():
     # Load model parameters ------------------------------------------------------------------------
     model_parameter_path = model_config.get('checkpoint_path', None)
     if model_parameter_path:
-        print_log(f'>>>>>>>>>>>Load checkpoint from {model_parameter_path}')
         checkpoint = torch.load(model_parameter_path, map_location=torch.device(config['device']))
         model.load_state_dict(checkpoint['state_dict'])
         config['train_config']['epoch'] = checkpoint['epoch']

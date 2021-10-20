@@ -31,8 +31,6 @@ from components.losses.dice import DiceLoss
 supported_loss_dict = {
     'Dice': DiceLoss(mode='multilabel'),
     'CrossEntropy': torch.nn.CrossEntropyLoss(),
-    'L1': torch.nn.L1Loss(reduction='mean'),
-    'SmoothL1': torch.nn.SmoothL1Loss(reduction='mean'),
     'MSE': torch.nn.MSELoss(reduction='mean'),
 }
 
