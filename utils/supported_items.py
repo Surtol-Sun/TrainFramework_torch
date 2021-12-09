@@ -1,9 +1,13 @@
 # Supported model
-import components.models.smp as smp
 from components.models.unet3d.model import UNet3D
+from components.models.unet.model import UNet
 from components.models.unet.model_gan import UNet_Gan
 from components.models.tscnet.model_step2 import TSCNetStep2
 supported_model_dict = {
+    'unet2d': UNet(
+        n_channels=1,
+        n_classes=1,
+    ),
     'unet2d_gan': UNet_Gan(
         in_channels=2,
         out_channels=1,
@@ -12,12 +16,6 @@ supported_model_dict = {
         in_channels=1,
         out_channels=1,
         is_segmentation=False,
-    ),
-    'unet2d_TSCNet': smp.Unet(
-        encoder_name='resnet18',        # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
-        encoder_weights=None,           # use `imagenet` pre-trained weights for encoder initialization
-        in_channels=2,                  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
-        classes=1,                      # model output channels (number of classes in your dataset)
     ),
     'TSCNetStep2': TSCNetStep2(
         in_channels=2,

@@ -5,13 +5,13 @@
 
 device: 'cuda:0'                 # 'cpu' when cuda not available, else 'cuda:0'
 model_config:
-  model_name: 'unet3d'          # Name of the model
+  model_name: 'unet2d'          # Name of the model
   checkpoint_path: null         # Path to load from saved checkpoints. Enter 'null' when train from scratch
 dataset_config:
   loader_name: 'dataset_mydatabase'      # Name of the dataset loader
 
   # Below are self-defined parameters used by 'cifar10'
-  # dataset_path: 'E:\北京大学\semi-3\Code\dataset_tif'
+#  dataset_path: 'E:\北京大学\semi-3\Code\dataset_tif'
   dataset_path: '/home/yxsun/win_data/20211209Skin'
   train_batch_size: 8
   val_batch_size: 8
@@ -21,6 +21,6 @@ train_config:
   # Below are self-defined parameters used by 'regular'
   max_epoch: 1000              # Maximum epoch
   print_freq: 5             # Print log every several iterations
-  learning_rate: 0.01         # Learning rate
+  learning_rate: 0.001         # Learning rate
 
 

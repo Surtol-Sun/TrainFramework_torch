@@ -132,13 +132,24 @@ class _DatasetLD(torch.utils.data.Dataset):
         return num
 
     def __getitem__(self, index):  # Read data once
+        mode = 'CHW'  # 'CHW', 'CHWS'
         img_list = []
         image_index_list = self.img_index_list[index]
         for image_index in image_index_list:
             img = self.image_file_list[image_index]  # [H, W]
             img = np.reshape(img, (1,) + img.shape)  # Convert gray image into [C, H, W] mode, where C =1
             img_list.append(img)
-        img_array = self._inner_rand_cut(np.stack(img_list, axis=-1), ((1, 128, 128) + (len(img_list),)))  # [C, H, W, Stack]
+
+        if mode == 'CHWS':
+            img_array = np.stack(img_list, axis=-1)  # [C, H, W, Stack]
+            img_array = self._inner_rand_cut(img_array, ((1, 128, 128) + (len(img_list),)))
+        elif mode == 'CHW':
+            img_array = np.stack(img_list, axis=1)[0]  # [C, H, W]
+            img_array = self._inner_rand_cut(img_array, (1, 128, 128))
+        else:
+            img_array = None
+            print(f'Unsupported mode {mode}')
+            exit()
 
         if self.transform is not None:
             img_array = self.transform(img_array)

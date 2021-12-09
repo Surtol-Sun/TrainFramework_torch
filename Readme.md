@@ -81,7 +81,9 @@ All your configurations can be summarize in one `yaml` file, so that you can cha
 
 | Model Name | Special Symbols                             | Explanations | Input Shape       | Output Shape      |
 | ---------- | ------------------------------------------- | ------------ | ----------------- | ----------------- |
-| UNet3D     | $S = Image \ Stack \ Num, where \  S \ge 8$ | 3D Unet      | $[B, C, H, W, S]$ | $[B, O, H, W, S]$ |
-| UNet_Gan   |                                             | 2D Unet Gan  | $[B, C, H, W]$    |                   |
+| UNet       |                                             | 2D UNet      | $[B, C, H, W]$    | $[B, O, H, W]$    |
+| UNet_Gan   |                                             | 2D UNet Gan  | $[B, C, H, W]$    |                   |
+| UNet3D     | $S = Image \ Stack \ Num, where \  S \ge 8$ | 3D UNet      | $[B, C, H, W, S]$ | $[B, O, H, W, S]$ |
+|            |                                             |              |                   |                   |
 |            |                                             |              |                   |                   |
 
