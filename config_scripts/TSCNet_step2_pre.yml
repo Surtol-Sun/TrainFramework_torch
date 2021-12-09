@@ -5,7 +5,7 @@
 
 device: 'cuda:0'                 # 'cpu' when cuda not available, else 'cuda:0'
 model_config:
-  model_name: 'TSCNetStep2'          # Name of the model
+  model_name: 'unet2d_gan'          # Name of the model
   checkpoint_path: null         # Path to load from saved checkpoints. Enter 'null' when train from scratch
 dataset_config:
   loader_name: 'collagen_dataset_TSCNet_mytif'      # Name of the dataset loader

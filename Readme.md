@@ -69,3 +69,19 @@ This framework also provide some template for easy use:
 
 All your configurations can be summarize in one `yaml` file, so that you can change some configurations easily. The configuration file is located at `config_scripts` folder. There is also a template provided: `config_scripts/template.yml`.
 
+## Model Explanation
+
+> **Symbol Explanation**
+>
+> + $C = Input \ Channel$
+> + $O = Output \ Channel$
+> + $B = Batch \ Size$
+> + $H = Height$
+> + $W = Width$
+
+| Model Name | Special Symbols                             | Explanations | Input Shape       | Output Shape      |
+| ---------- | ------------------------------------------- | ------------ | ----------------- | ----------------- |
+| UNet3D     | $S = Image \ Stack \ Num, where \  S \ge 8$ | 3D Unet      | $[B, C, H, W, S]$ | $[B, O, H, W, S]$ |
+| UNet_Gan   |                                             | 2D Unet Gan  | $[B, C, H, W]$    |                   |
+|            |                                             |              |                   |                   |
+

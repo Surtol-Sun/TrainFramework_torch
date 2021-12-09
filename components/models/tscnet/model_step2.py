@@ -191,8 +191,6 @@ class Generator(nn.Module):
 
         self.rdn3 = RDN(scale_factor=1, in_channels=self.in_channels*2, out_channels=self.out_channels, num_features=self.in_channels, growth_rate=4, num_blocks=3, num_layers=3)
 
-        self.discriminator = Discriminator(in_channels=out_channels)
-
     def forward(self, x):
         x1, x2 = torch.chunk(x, 2, dim=1)  # split channels
         x1 = self.rdn1(x1)

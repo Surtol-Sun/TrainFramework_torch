@@ -1,17 +1,17 @@
 # Supported model
 import components.models.smp as smp
 from components.models.unet3d.model import UNet3D
+from components.models.unet.model_gan import UNet_Gan
 from components.models.tscnet.model_step2 import TSCNetStep2
 supported_model_dict = {
-    'unet2d': smp.Unet(
-        encoder_name='resnet18',        # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
-        encoder_weights=None,           # use `imagenet` pre-trained weights for encoder initialization
-        in_channels=1,                  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
-        classes=3,                      # model output channels (number of classes in your dataset)
+    'unet2d_gan': UNet_Gan(
+        in_channels=2,
+        out_channels=1,
     ),
     'unet3d': UNet3D(
         in_channels=1,
         out_channels=1,
+        is_segmentation=False,
     ),
     'unet2d_TSCNet': smp.Unet(
         encoder_name='resnet18',        # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
@@ -39,12 +39,14 @@ from components.dataset_loader.dataset_loader import cifar10_dataloader, cifar10
 from components.dataset_loader.dataset_loader_3dcollagen import collagen3d_dataset
 from components.dataset_loader.dataset_loader_collagen_TSCNet import collagen_dataset_TSCNet
 from components.dataset_loader.dataset_loader_collagen_TSCNet_mytif import collagen_dataset_TSCNet_mytif
+from components.dataset_loader.dataset_loader_mydatabase import dataset_mydatabase
 supported_dataloader_dict = {
     'cifar10': cifar10_dataloader,
     'cifar100': cifar100_dataloader,
     'collagen3d_dataset': collagen3d_dataset,
     'collagen_dataset_TSCNet': collagen_dataset_TSCNet,
     'collagen_dataset_TSCNet_mytif': collagen_dataset_TSCNet_mytif,
+    'dataset_mydatabase': dataset_mydatabase,
 }
 
 # Supported training strategy

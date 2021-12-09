@@ -35,7 +35,7 @@ class TrainTSCNet_pre:
         # ToDo !!!
         self.optimizer = torch.optim.Adam(self.model.generator.parameters(), lr=0.01, betas=(0.5, 0.999))
         self.schedule = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.9)
-        self.optimizer_d = torch.optim.Adam(self.model.discriminator.parameters(), lr=0.0001, betas=(0.5, 0.999))
+        self.optimizer_d = torch.optim.Adam(self.model.discriminator.parameters(), lr=0.01, betas=(0.5, 0.999))
         self.schedule_d = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.9)
 
     @staticmethod
@@ -99,6 +99,7 @@ class TrainTSCNet_pre:
             from utils.supported_items import supported_loss_dict
             loss = supported_loss_dict['MSE'](img1_5, img1_5_self_define) + \
                    supported_loss_dict['MSE'](img2_5, img2_5_self_define)
+            loss *= 10.
             if mode == 'train':
                 loss.backward()
                 self.optimizer.step()

@@ -5,7 +5,7 @@
 
 device: 'cuda:0'                 # 'cpu' when cuda not available, else 'cuda:0'
 model_config:
-  model_name: 'TSCNetStep2'          # Name of the model
+  model_name: 'unet2d_gan'          # Name of the model
   checkpoint_path: null         # Path to load from saved checkpoints. Enter 'null' when train from scratch
 #  checkpoint_path: '/home/yxsun/win_file/semi-3/Code/TrainFramework_torch/results/checkpoints/checkpoint-20210927-163928.pth'         # Path to load from saved checkpoints. Enter 'null' when train from scratch
 dataset_config:
