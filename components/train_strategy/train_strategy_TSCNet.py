@@ -26,7 +26,7 @@ class TrainTSCNet:
         self.max_epoch = train_config['max_epoch']
         self.learning_rate = train_config['learning_rate']
 
-        from components.metrics.MSE import mse
+        from useful_functions.metrics.MSE import mse
         self.evaluate_metric_dict = {'MSE': mse}  # A dict that contains concerned metrics, e.g. {IoU: IoUFunc, ...} ToDo !!!!
 
         # ToDo !!!

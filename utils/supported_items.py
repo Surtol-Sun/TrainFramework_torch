@@ -23,15 +23,6 @@ supported_model_dict = {
     )
 }
 
-# Supported loss
-import torch
-from components.losses.dice import DiceLoss
-supported_loss_dict = {
-    'Dice': DiceLoss(mode='multilabel'),
-    'CrossEntropy': torch.nn.CrossEntropyLoss(),
-    'MSE': torch.nn.MSELoss(reduction='mean'),
-}
-
 # Supported data loader
 from components.dataset_loader.dataset_loader import cifar10_dataloader, cifar100_dataloader
 from components.dataset_loader.dataset_loader_3dcollagen import collagen3d_dataset

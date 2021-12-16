@@ -3,9 +3,9 @@ import torch
 
 from utils.utils import print_log, AverageMeter, time_string
 from utils.global_config import get_checkpoint_path, get_use_cuda
-from utils.supported_items import supported_loss_dict
 
-from components.metrics.MSE import mse
+from useful_functions.metrics.MSE import mse
+
 
 class RegularTrain:
     def __init__(self, model, train_loader, val_loader, train_config):

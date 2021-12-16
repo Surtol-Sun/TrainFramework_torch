@@ -4,9 +4,11 @@ import torch
 from utils.utils import print_log, AverageMeter, time_string
 from utils.global_config import get_checkpoint_path, get_use_cuda
 
+from useful_functions.metrics.MSE import mse
+
 
 class RegularTrain:
-    def __init__(self, model, criterion, optimizer, train_loader, train_config):
+    def __init__(self, model, train_loader, val_loader, train_config):
         '''
         :param model:
         :param train_config: Should contain the following keys:
@@ -14,19 +16,24 @@ class RegularTrain:
         :return:
         '''
         # global use_cuda
-        self.epoch = 0
+        self.epoch = train_config.get('epoch', 0)
         self.use_cuda = get_use_cuda()
         self.checkpoint_path = get_checkpoint_path()
 
         self.model = model
-        self.criterion = criterion
-        self.optimizer = optimizer
         self.train_loader = train_loader
+        self.val_loader = val_loader
         self.print_freq = train_config['print_freq']
         self.max_epoch = train_config['max_epoch']
         self.learning_rate = train_config['learning_rate']
 
-        self.evaluate_metric_dict = {}  # A dict that contains concerned metrics, e.g. {IoU: IoUFunc, ...} ToDo !!!!
+
+        # A dict that contains concerned metrics, e.g. {IoU: IoUFunc, ...} ToDo !!!!
+        self.evaluate_metric_dict = {'MSE': mse}
+
+        # ToDo !!!
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=0.01, betas=(0.5, 0.999))
+        self.schedule = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.9)
 
     @staticmethod
     def save_checkpoint(state, filename):
@@ -87,7 +94,7 @@ class RegularTrain:
             # compute output
             self.optimizer.zero_grad()
             output = self.model(input_var)
-            loss = self.criterion(output, target_var)
+            loss = mse(output, target_var)
 
             # compute gradient and do SGD step
             if mode == 'train':

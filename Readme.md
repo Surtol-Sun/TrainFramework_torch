@@ -2,15 +2,7 @@
 
 ## Pipeline
 
-```mermaid
-graph LR;
-    load-model			-->		load-parameters			-->	Train;
-    define-losses										-->	Train;
-    load-dataset 		-->		dataset-augmentation		-->	Train;
-    define-training-hyperparameter-and-strategy				-->		Train;
-
-	Train	-->	log-and-visualization;
-```
+![Pipeline](./docs/images/Pipeline.png)
 
 ## File Structure
 
@@ -19,6 +11,9 @@ graph LR;
   + models 
   + dataset_loader
   + train_strategy
+  
++ useful_functions
+
   + losses
   + metrics
 
@@ -57,8 +52,9 @@ Add your self-defined methods or functions in the corresponding folder for clear
 + Put you model in `components/models` folder 
 + Put you data loader in `components/dataset_loader` folder 
 + Put you train strategy in `components/train_strategy` folder 
-  + You may would like to use some self-defined metrics to evaluate your model results, put you metrics in `components/metrics`folder 
-+ Put you loss functions in `components/losses` folder 
+  + Optimization, Loss Function, Metrics are included in a training strategy
+  + You may would like to use some self-defined loss functions. Write them directly in `train_strategy` or put then  in  `useful_functions/losses` folder 
+  + You may would like to use some self-defined metrics to evaluate your model results. Write them directly in `train_strategy` or put then  in  `useful_functions/losses` folder 
 
 This framework also provide some template for easy use:
 
