@@ -1,0 +1,27 @@
+# Configuration file description:
+# Interpolation method comes from Step2 of:
+# Two-Stage Self-supervised Cycle-Consistency Network for Reconstruction of Thin-Slice MR Images
+
+
+device: 'cuda:0'                 # 'cpu' when cuda not available, else 'cuda:0'
+model_config:
+  model_name: 'unet2d_gan'          # Name of the model
+  checkpoint_path: null         # Path to load from saved checkpoints. Enter 'null' when train from scratch
+#  checkpoint_path: '/home/yxsun/win_file/semi-3/Code/TrainFramework_torch/results/checkpoints/checkpoint-20210927-163928.pth'         # Path to load from saved checkpoints. Enter 'null' when train from scratch
+dataset_config:
+  loader_name: 'collagen_dataset_TSCNet_mytif'      # Name of the dataset loader
+
+  # Below are self-defined parameters used by 'cifar10'
+  # dataset_path: 'E:\北京大学\semi-3\Code\dataset_tif'
+  dataset_path: '/home/yxsun/win_data/20210924TSCNet_test'
+  train_batch_size: 8
+  val_batch_size: 8
+train_config:
+  strategy_name: 'TrainTSCNet'   # Strategy for training
+
+  # Below are self-defined parameters used by 'regular'
+  max_epoch: 1000              # Maximum epoch
+  print_freq: 5             # Print log every several iterations
+  learning_rate: 0.00001         # Learning rate
+
+
