@@ -1,13 +1,12 @@
 import torch
 import argparse
 
-from utils.global_config import *
 from utils.utils import load_config, set_use_cuda, print_log
 from utils.supported_items import supported_model_dict, supported_dataloader_dict, supported_training_strategy_dict
 
 
 parser = argparse.ArgumentParser(description='3D Segmentation')
-parser.add_argument('--config', type=str, help='Path to the YAML config file', default=r'config_scripts/TSCNet_step2.yml')
+parser.add_argument('--config', type=str, help='Path to the YAML config file', default=r'config_scripts/IKC.yml')
 args = parser.parse_args()
 
 

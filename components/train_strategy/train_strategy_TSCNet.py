@@ -3,7 +3,8 @@ import torch
 
 from utils.utils import print_log, AverageMeter, time_string
 from utils.global_config import get_checkpoint_path, get_use_cuda
-from utils.supported_items import supported_loss_dict
+
+from useful_functions.metrics.MSE import mse
 
 
 class TrainTSCNet:
@@ -104,7 +105,7 @@ class TrainTSCNet:
                 imsave(f'results/images/{self.epoch}-2out.tif', output.detach().to('cpu').numpy())
 
             # Train Generator
-            loss_mse = supported_loss_dict['MSE'](output, img2_var)
+            loss_mse = mse(output, img2_var)
             loss_cyc = torch.pow(output - img2_var, 2).mean(dim=[0, 1, 2, 3]) - torch.log(out_discriminator_img2.mean())
             loss = loss_mse + loss_cyc
             if mode == 'train' and losses_d.avg < 0.5:
