@@ -1,0 +1,9 @@
+!.gitignore
+**/__pycache__/
+.project
+.pydevproject
+.settings/
+.idea/
+
+results/checkpoints/*
+
