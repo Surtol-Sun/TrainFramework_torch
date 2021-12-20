@@ -4,7 +4,7 @@ import torch
 from utils.utils import print_log, AverageMeter, time_string
 from utils.global_config import get_checkpoint_path, get_use_cuda
 
-from useful_functions.metrics.MSE import mse
+from useful_functions.losses.mse import MSE
 
 
 class TrainTSCNet:
@@ -27,8 +27,7 @@ class TrainTSCNet:
         self.max_epoch = train_config['max_epoch']
         self.learning_rate = train_config['learning_rate']
 
-        from useful_functions.metrics.MSE import mse
-        self.evaluate_metric_dict = {'MSE': mse}  # A dict that contains concerned metrics, e.g. {IoU: IoUFunc, ...} ToDo !!!!
+        self.evaluate_metric_dict = {'MSE': MSE()}  # A dict that contains concerned metrics, e.g. {IoU: IoUFunc, ...} ToDo !!!!
 
         # ToDo !!!
         self.optimizer = torch.optim.Adam(self.model.generator.parameters(), lr=0.01, betas=(0.5, 0.999))
@@ -105,7 +104,8 @@ class TrainTSCNet:
                 imsave(f'results/images/{self.epoch}-2out.tif', output.detach().to('cpu').numpy())
 
             # Train Generator
-            loss_mse = mse(output, img2_var)
+            MSE_Loss = MSE()
+            loss_mse = MSE_Loss(output, img2_var)
             loss_cyc = torch.pow(output - img2_var, 2).mean(dim=[0, 1, 2, 3]) - torch.log(out_discriminator_img2.mean())
             loss = loss_mse + loss_cyc
             if mode == 'train' and losses_d.avg < 0.5:

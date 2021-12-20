@@ -4,7 +4,7 @@ import torch
 from utils.utils import print_log, AverageMeter, time_string
 from utils.global_config import get_checkpoint_path, get_use_cuda
 
-from useful_functions.metrics.MSE import MSE
+from useful_functions.losses.mse import MSE
 
 
 class TrainIKC:
