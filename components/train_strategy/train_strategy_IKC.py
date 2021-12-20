@@ -4,7 +4,7 @@ import torch
 from utils.utils import print_log, AverageMeter, time_string
 from utils.global_config import get_checkpoint_path, get_use_cuda
 
-from useful_functions.metrics.MSE import mse
+from useful_functions.metrics.MSE import MSE
 
 
 class TrainIKC:
@@ -28,8 +28,8 @@ class TrainIKC:
         self.learning_rate = train_config['learning_rate']
 
         # A dict that contains concerned metrics, e.g. {IoU: IoUFunc, ...} ToDo !!!!
-        self.loss_dict = {'PLoss': mse, 'SFTMDLoss': mse, 'CLoss': mse}
-        self.evaluate_metric_dict = {'MSE': mse}
+        self.loss_dict = {'PLoss': MSE(), 'SFTMDLoss': MSE(), 'CLoss': MSE()}
+        self.evaluate_metric_dict = {'MSE': MSE()}
 
         # Optimizer and schedule here
         self.optimizer_predictor = torch.optim.Adam(self.model.Predictor.parameters(), lr=0.01, betas=(0.5, 0.999))
