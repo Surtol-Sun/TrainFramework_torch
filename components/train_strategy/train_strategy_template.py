@@ -4,7 +4,7 @@ import torch
 from utils.utils import print_log, AverageMeter, time_string
 from utils.global_config import get_checkpoint_path, get_use_cuda
 
-from useful_functions.losses.mse import MSE
+from useful_functions.losses.mse import MSE_Loss
 
 
 class RegularTrain:
@@ -94,8 +94,8 @@ class RegularTrain:
             # compute output
             self.optimizer.zero_grad()
             output = self.model(input_var)
-            MSE_Loss = MSE()
-            loss = MSE_Loss(output, target_var)
+            MSE_loss = MSE_Loss()
+            loss = MSE_loss(output, target_var)
 
             # compute gradient and do SGD step
             if mode == 'train':
