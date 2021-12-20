@@ -614,7 +614,34 @@ class _DatasetLD(torch.utils.data.Dataset):
                 }
 
     def __len__(self):
-        return len(self.img_index_list) * 100
+        return len(self.img_index_list)
+
+
+class PCA(object):
+    # Reference https://blog.csdn.net/SHU15121856/article/details/84646874
+    def __init__(self):
+        pass
+
+    def __int__(self, U_reduce_weight):
+        self.U_reduce = U_reduce_weight
+
+    def generate_pca(self, A, k_len):
+        # Matrix A should be normalized
+        # Matrix A is m x n, which contains m data with n dimension
+        Sigma = np.dot(A.T, A)
+        U, S, V = np.linalg.svd(Sigma)  # U is n x n
+
+        U_reduce = U[:, 0:k_len]
+        Z = np.dot(A, U_reduce)
+
+        self.U_reduce = U_reduce
+        return Z, U_reduce
+
+    def inverse_pca(self, Z, U_reduce=None):
+        if U_reduce is None:
+            U_reduce = self.U_reduce
+        A = np.dot(Z, U_reduce.T)
+        return A
 
 
 ####################
@@ -659,7 +686,7 @@ class SRMDPreprocessing(object):
             self.size = self.weight.shape
 
         def __call__(self, kernel):
-            return np.matmul(kernel.flatten(), self.weight)
+            return np.dot(kernel.flatten(), self.weight)
 
     @staticmethod
     class SRKernel(object):
