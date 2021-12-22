@@ -8,7 +8,7 @@ from utils.supported_items import supported_model_dict
 
 
 parser = argparse.ArgumentParser(description='3D Segmentation')
-parser.add_argument('--config', type=str, help='Path to the YAML config file', default=r'config_scripts/TSCNet_step2.yml')
+parser.add_argument('--config', type=str, help='Path to the YAML config file', default=r'config_scripts/IKC_use.yml')
 args = parser.parse_args()
 
 
@@ -38,7 +38,27 @@ def main():
 
     # Generate result -------------------------------------------------------------------------------
     from skimage import io
-    data_tif = io.imread(r'/home/yxsun/win_data/20210715纤维样本3D/T-AF-300-3D/CellVideo/AVG_CellVideo 0.tif')
+    data_tif = io.imread(r'/home/yxsun/win_data/20211209Skin/61af149e5c412fc885ae1e79/image.tif')
+    data_use = data_tif[6:9, :256, :256]
+    data_use = _normalization(data_use, dtype=np.float32)
+    io.imsave('img_or1.tif', data_use[0])
+    io.imsave('img_or2.tif', data_use[1])
+    io.imsave('img_or3.tif', data_use[2])
+
+    data_use = np.transpose(data_use, (0, 1, 2))  # (H, W, C)
+    data_use = np.array([data_use])  # (B, H, W, C)
+
+    if use_cuda:
+        data_use = torch.Tensor(data_use).cuda()
+    else:
+        data_use = torch.Tensor(data_use)
+    kernel_code = model.Predictor(data_use)
+    img_hr = model.SFTMD(data_use, kernel_code)
+    img_hr = img_hr.detach().cpu().numpy()[0]
+    io.imsave('img_hr1.tif', img_hr[0])
+    io.imsave('img_hr2.tif', img_hr[1])
+    io.imsave('img_hr3.tif', img_hr[2])
+    exit()
 
     # result_list = []
     # with torch.no_grad():

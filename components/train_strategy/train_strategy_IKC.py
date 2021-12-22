@@ -124,7 +124,10 @@ class TrainIKC:
             loss_sftmd = self.loss_dict['SFTMDLoss'](target_var, output)
 
             if mode == 'train':
+                loss_predictor.backward()
                 self.optimizer_predictor.step()
+
+                loss_sftmd.backward()
                 self.optimizer_sftmd.step()
 
             # Train Corrector
@@ -146,6 +149,15 @@ class TrainIKC:
 
             # Print log
             if i % self.print_freq == 0:
+                import matplotlib.pyplot as plt
+                from components.dataset_loader.dataset_loader_mydatabase_IKC import pca_matrix, PCA
+                pca = PCA(U_reduce_weight=pca_matrix)
+                kernel = pca.inverse_pca(kernel_code.cpu().detach().numpy()[0])
+                kernel_predict = pca.inverse_pca(kernel_code_predict.cpu().detach().numpy()[0])
+                plt.imsave('output.png', output.cpu().detach().numpy()[0][0])
+                plt.imsave('kernel.png', kernel.reshape(21, 21))
+                plt.imsave('kernel preidct.png', kernel_predict.reshape(21, 21))
+
                 print_str = f'=={mode}== '
                 print_str += f'Epoch[{self.epoch}]: [{i}/{len(self.train_loader)}]\t'
                 for loss_name in losses_avg_dict.keys():

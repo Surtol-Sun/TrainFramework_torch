@@ -604,7 +604,6 @@ class _DatasetLD(torch.utils.data.Dataset):
         #     io.imsave(f'LQ{i}.tif', img)
         # io.imsave(f'K.tif', img_kernel)
 
-        exit()
 
         return {'LQ': img_LQ,
                 'Kernel_code': kernel_code,
@@ -614,15 +613,12 @@ class _DatasetLD(torch.utils.data.Dataset):
                 }
 
     def __len__(self):
-        return len(self.img_index_list)
+        return len(self.img_index_list) * 100
 
 
 class PCA(object):
     # Reference https://blog.csdn.net/SHU15121856/article/details/84646874
-    def __init__(self):
-        pass
-
-    def __int__(self, U_reduce_weight):
+    def __init__(self, U_reduce_weight=None):
         self.U_reduce = U_reduce_weight
 
     def generate_pca(self, A, k_len):
