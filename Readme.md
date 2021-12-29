@@ -36,7 +36,7 @@ Below is an instruction for adding a self-defined model for use.
 
 ### 1 Add indexes  for  your self-defined item
 
-Add self-defined items in `utils/supported_items.py`. This file has 4 dictionaries:
+Add self-defined items in `components/supported_items.py`. This file has 4 dictionaries:
 
 + supported_model_dict 
 + supported_loss_dict 

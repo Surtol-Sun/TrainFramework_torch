@@ -36,6 +36,7 @@ from components.dataset_loader.dataset_loader_collagen_TSCNet import collagen_da
 from components.dataset_loader.dataset_loader_collagen_TSCNet_mytif import collagen_dataset_TSCNet_mytif
 from components.dataset_loader.dataset_loader_mydatabase import dataset_mydatabase
 from components.dataset_loader.dataset_loader_mydatabase_IKC import dataset_mydatabase_IKC
+from components.dataset_loader.dataset_loader_mydatabase_IKCz import dataset_mydatabase_IKCz
 supported_dataloader_dict = {
     'cifar10': cifar10_dataloader,
     'cifar100': cifar100_dataloader,
@@ -44,6 +45,7 @@ supported_dataloader_dict = {
     'collagen_dataset_TSCNet_mytif': collagen_dataset_TSCNet_mytif,
     'dataset_mydatabase': dataset_mydatabase,
     'dataset_mydatabase_IKC': dataset_mydatabase_IKC,
+    'dataset_mydatabase_IKCz': dataset_mydatabase_IKCz,
 }
 
 # Supported training strategy
@@ -51,11 +53,13 @@ from components.train_strategy.train_strategy import RegularTrain
 from components.train_strategy.train_strategy_TSCNet import TrainTSCNet
 from components.train_strategy.train_strategy_TSCNet_pre import TrainTSCNet_pre
 from components.train_strategy.train_strategy_IKC import TrainIKC
+from components.train_strategy.train_strategy_IKCz import TrainIKCz
 supported_training_strategy_dict = {
     'regular': RegularTrain,
     'TrainTSCNet': TrainTSCNet,
     'TrainTSCNet_pre': TrainTSCNet_pre,
     'TrainIKC': TrainIKC,
+    'TrainIKCz': TrainIKCz,
 }
 
 

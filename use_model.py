@@ -4,7 +4,7 @@ import numpy as np
 
 from utils.global_config import *
 from utils.utils import load_config, set_use_cuda, print_log, _normalization
-from utils.supported_items import supported_model_dict
+from components.supported_components import supported_model_dict
 
 
 parser = argparse.ArgumentParser(description='3D Segmentation')
@@ -38,8 +38,10 @@ def main():
 
     # Generate result -------------------------------------------------------------------------------
     from skimage import io
-    data_tif = io.imread(r'/home/yxsun/win_data/20211209Skin/61af149e5c412fc885ae1e79/image.tif')
-    data_use = data_tif[6:9, :256, :256]
+    data_tif = io.imread(r'/home/yxsun/win_data/00000000Scan200nm/183058&183844.tif')
+    data_tif = np.transpose(data_tif, [1, 0, 2])  # ZXY => XZY
+    data_use = data_tif[6:9, :, :]
+    # data_use = data_tif[6:9, :256, :256]
     data_use = _normalization(data_use, dtype=np.float32)
     io.imsave('img_or1.tif', data_use[0])
     io.imsave('img_or2.tif', data_use[1])

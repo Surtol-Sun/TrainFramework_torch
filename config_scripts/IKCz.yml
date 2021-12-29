@@ -6,17 +6,17 @@
 device: 'cuda:0'                 # 'cpu' when cuda not available, else 'cuda:0'
 model_config:
   model_name: 'IKC'          # Name of the model
-  checkpoint_path: '/home/yxsun/win_file/semi-3/Code/TrainFramework_torch/results/checkpoints/checkpoint-20211229-144458.pth'         # Path to load from saved checkpoints. Enter 'null' when train from scratch
+  checkpoint_path: null         # Path to load from saved checkpoints. Enter 'null' when train from scratch
 dataset_config:
-  loader_name: 'dataset_mydatabase_IKC'      # Name of the dataset loader
+  loader_name: 'dataset_mydatabase_IKCz'      # Name of the dataset loader
 
   # Below are self-defined parameters used by 'cifar10'
   #dataset_path: 'E:\20211209Skin'
-  dataset_path: '/home/yxsun/win_data/20211209Skin'
+  dataset_path: '/home/yxsun/win_data/00000000Scan200nm'
   train_batch_size: 8
-  val_batch_size: 8
+  val_batch_size: 1
 train_config:
-  strategy_name: 'TrainIKC'   # Strategy for training
+  strategy_name: 'TrainIKCz'   # Strategy for training
 
   # Below are self-defined parameters used by 'regular'
   max_epoch: 1000              # Maximum epoch

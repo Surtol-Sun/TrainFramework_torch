@@ -1,16 +1,26 @@
 import h5py
+import numpy as np
 from skimage import io
 
 '''
 This tool is used to extract images in h5 file to some specific folder.
 '''
 
-file_path = r'/home/yxsun/win_data/20210720Arabidopsis-thaliana-lateral-root/Light-sheet/test/Movie1_t00006_crop_gt.h5'
+file_path = r'imgs.hdf5'
 
 f = h5py.File(file_path, 'r')
 print(f'Keys in this file: {list(f.keys())}')
-for key in list(f.keys()):
-    file_name = f'{key}.tif'
-    io.imsave(file_name, f[key])
+
+data_dict = {}
+for key, item in f.items():
+    print(f'Reading data {item} ...')
+    data_dict[key] = item[()]
+    print(f'Data [{key}] with shape {data_dict[key].shape}')
+
+for i in range(362):
+    image = data_dict['volData'][:, :, :, i]  # [x, x, z]
+    image = np.transpose(image, [2, 0, 1])
+    io.imsave(f'{i}.tif', image)
+
 
 
