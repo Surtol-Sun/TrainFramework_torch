@@ -2,7 +2,6 @@ import torch
 import argparse
 import numpy as np
 
-from utils.global_config import *
 from utils.utils import load_config, set_use_cuda, print_log, _normalization
 from components.supported_components import supported_model_dict
 
@@ -37,29 +36,41 @@ def main():
         model = model.cuda()
 
     # Generate result -------------------------------------------------------------------------------
+    img_hr_list = []
     from skimage import io
-    data_tif = io.imread(r'/home/yxsun/win_data/00000000Scan200nm/183058&183844.tif')
-    data_tif = np.transpose(data_tif, [1, 0, 2])  # ZXY => XZY
-    data_use = data_tif[6:9, :, :]
-    # data_use = data_tif[6:9, :256, :256]
-    data_use = _normalization(data_use, dtype=np.float32)
-    io.imsave('img_or1.tif', data_use[0])
-    io.imsave('img_or2.tif', data_use[1])
-    io.imsave('img_or3.tif', data_use[2])
+    # data_tif = io.imread(r'/home/yxsun/win_data/00000000Scan200nm/183058&183844.tif')  # ZXY
+    data_tif = io.imread(r'/home/yxsun/win_data/00000000Scan200nm/160645.tif')  # ZXY
 
-    data_use = np.transpose(data_use, (0, 1, 2))  # (H, W, C)
-    data_use = np.array([data_use])  # (B, H, W, C)
+    # Blur
+    def GaussianKernel2D(l, mu=0, alpha=1, sigma=1):
+        axis_line = np.arange(-l // 2 + 1, l // 2 + 1)
+        xx, yy = np.meshgrid(axis_line, axis_line)
 
-    if use_cuda:
-        data_use = torch.Tensor(data_use).cuda()
-    else:
-        data_use = torch.Tensor(data_use)
-    kernel_code = model.Predictor(data_use)
-    img_hr = model.SFTMD(data_use, kernel_code)
-    img_hr = img_hr.detach().cpu().numpy()[0]
-    io.imsave('img_hr1.tif', img_hr[0])
-    io.imsave('img_hr2.tif', img_hr[1])
-    io.imsave('img_hr3.tif', img_hr[2])
+        kernel = mu + alpha * np.exp(- (xx ** 2 + yy ** 2) / sigma ** 2)
+        return kernel / np.sum(kernel)
+    from scipy.signal import convolve
+    for i, img_i in enumerate(data_tif):
+        data_tif[i] = convolve(img_i, GaussianKernel2D(l=11, sigma=2), mode='same')
+    io.imsave('data_use.tif', data_tif)
+
+    # Use model
+    for i in range(data_tif.shape[0]-4):
+        print(f'Handling with image {i}')
+        data_use = data_tif[i:i+4, :, :]
+        # data_use = data_tif[6:9, :256, :256]
+        data_use = _normalization(data_use, dtype=np.float32)
+
+        data_use = np.array([data_use])  # (B, S, H, W)
+
+        if use_cuda:
+            data_use = torch.Tensor(data_use).cuda()
+        else:
+            data_use = torch.Tensor(data_use)
+        img_hr = model.generator(data_use)
+        img_hr = img_hr.detach().cpu().numpy()[0]
+        img_hr_list.append(np.average(img_hr, axis=0))
+        # io.imsave('img_hr.tif', img_hr)
+    io.imsave('img_hr_list.tif', np.stack(img_hr_list, axis=0))
     exit()
 
     # result_list = []

@@ -36,12 +36,12 @@ class Discriminator(nn.Module):
             nn.AdaptiveAvgPool2d(1),
             nn.Conv2d(256, 256, kernel_size=(1, 1)),
             nn.LeakyReLU(0.2),
-            nn.Conv2d(256, 1, kernel_size=(1, 1))
+            nn.Conv2d(256, 2, kernel_size=(1, 1))
         )
 
     def forward(self, x):
         batch_size = x.size(0)
-        return torch.sigmoid(self.net(x).view(batch_size))
+        return torch.sigmoid(self.net(x).view(batch_size, 2))
 
 
 class Generator(nn.Module):
@@ -85,6 +85,13 @@ class UNet_Gan(nn.Module):
         self.generator = Generator(in_channels=in_channels, out_channels=out_channels)
 
     def forward(self, x):
-        return self.generator(x)
+        x_ = self.generator(x)
+
+        import numpy as np
+        axis_len, cut_len = x_.size(2), x_.size(1)
+        cut_start = np.random.randint(0, axis_len - cut_len)
+        x__ = x_[:, :, cut_start:cut_start + cut_len, :]  # [B, C, cut to C, W]
+        x__ = torch.transpose(x__, 1, 2)  # [B, C, cut to C, W] => [B, cut to C, C, W]
+        return self.discriminator(x__)
 
 

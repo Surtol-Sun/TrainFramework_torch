@@ -6,7 +6,7 @@ from components.supported_components import supported_model_dict, supported_data
 
 
 parser = argparse.ArgumentParser(description='3D Segmentation')
-parser.add_argument('--config', type=str, help='Path to the YAML config file', default=r'config_scripts/IKCz.yml')
+parser.add_argument('--config', type=str, help='Path to the YAML config file', default=r'config_scripts/IKCz_my.yml')
 args = parser.parse_args()
 
 
@@ -45,6 +45,7 @@ def main():
 
         # Train -------------------------------------------------------------------------------------
         train_successfully = True
+        train_strategy.train()
         try:
             train_strategy.train()
         except RuntimeError as e:

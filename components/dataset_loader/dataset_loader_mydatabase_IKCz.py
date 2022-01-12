@@ -17,11 +17,12 @@ def dataset_mydatabase_IKCz(dataloader_config):
     dataset_path = dataloader_config['dataset_path']
     train_batch_size = dataloader_config['train_batch_size']
     val_batch_size = dataloader_config['val_batch_size']
+    data_out_shape = dataloader_config['data_out_shape']
     num_workers = os.cpu_count()
     # num_workers = 1
 
-    train_data = _DatasetLD(data_path=dataset_path, mode='train')
-    test_data = _DatasetLD(data_path=dataset_path, mode='test')
+    train_data = _DatasetLD(data_path=dataset_path, data_out_shape=data_out_shape, mode='train')
+    test_data = _DatasetLD(data_path=dataset_path, data_out_shape=data_out_shape, mode='test')
     train_loader = torch.utils.data.DataLoader(train_data, batch_size=train_batch_size, shuffle=True,
                                                num_workers=num_workers, pin_memory=True)
     val_loader = torch.utils.data.DataLoader(test_data, batch_size=val_batch_size, shuffle=False,
@@ -32,7 +33,7 @@ def dataset_mydatabase_IKCz(dataloader_config):
 
 
 class _DatasetLD(torch.utils.data.Dataset):
-    def __init__(self, data_path, mode='train'):
+    def __init__(self, data_path, data_out_shape, mode='train'):
         super().__init__()
         self.mode = mode  # 'train' or 'test'
         self.dataset_path = data_path
@@ -43,16 +44,23 @@ class _DatasetLD(torch.utils.data.Dataset):
 
         self.LowResolutionPreprocess = BlurPreprocessing()
 
+        self.data_out_shape = data_out_shape
+
         # Generate required data
-        stack_img_num = 3
+        stack_img_num = self.data_out_shape[0]
         for img_path, json_dict in self.read_tif_file(self.dataset_path):
             img_file = io.imread(img_path)
             img_file_lowre = self.LowResolutionPreprocess(img_file, psf_dim='zxy', return_kernel=False)
+            # img_file_lowre = img_file
             for i in range(img_file.shape[0]):
-                img_f = _normalization(img_file[i], dtype=np.float32)
+                img_f = img_file[i]
+                img_f = self.LowResolutionPreprocess.convolve(img_f, self.LowResolutionPreprocess.GaussianKernel2D(l=11, sigma=2))
+                img_f = _normalization(img_f, dtype=np.float32)
                 self.image_file_list.append(np.ascontiguousarray(img_f))
 
-                img_f_lowre = _normalization(img_file_lowre[i], dtype=np.float32)
+                img_f_lowre = img_file_lowre[i]
+                img_f_lowre = self.LowResolutionPreprocess.convolve(img_f_lowre, self.LowResolutionPreprocess.GaussianKernel2D(l=11, sigma=2))
+                img_f_lowre = _normalization(img_f_lowre, dtype=np.float32)
                 self.image_lowre_file_list.append(np.ascontiguousarray(img_f_lowre))
                 if i >= stack_img_num - 1:
                     index_base = len(self.image_file_list)
@@ -131,6 +139,8 @@ class _DatasetLD(torch.utils.data.Dataset):
         return num
 
     def __getitem__(self, index):  # Read data once
+        data_out_z, data_out_x, data_out_y = self.data_out_shape
+
         index = index % len(self.img_index_list)
         img_list = []
         img_lowre_list = []
@@ -143,10 +153,10 @@ class _DatasetLD(torch.utils.data.Dataset):
             img_lowre_list.append(img_lowre)
 
         img_array = np.stack(img_list+img_lowre_list, axis=0)  # [Stack, H, W]
-        img_array = self._inner_rand_cut(img_array, (6, 128, 128))
+        img_array = self._inner_rand_cut(img_array, (data_out_z*2, data_out_x, data_out_y))
 
-        img_GT = np.array(img_array[:3], dtype=np.float32)
-        img_LQ = np.array(img_array[3:], dtype=np.float32)
+        img_GT = np.array(img_array[:data_out_z], dtype=np.float32)
+        img_LQ = np.array(img_array[data_out_z:], dtype=np.float32)
 
         # print(f'img_GT size = {img_GT.shape}')
         # print(f'img_LQ size = {img_LQ.shape}')
@@ -168,7 +178,7 @@ class _DatasetLD(torch.utils.data.Dataset):
                 }
 
     def __len__(self):
-        dataset_length = len(self.img_index_list) * 10 if self.mode == 'train' else len(self.img_index_list)
+        dataset_length = len(self.img_index_list) * 2 if self.mode == 'train' else len(self.img_index_list)
         return dataset_length
 
 
@@ -203,12 +213,16 @@ class BlurPreprocessing(object):
         return np.clip(noise + img_in, a_min=min, a_max=max)
 
     @staticmethod
-    def blur2d(img_in, kernel):
-        return cv2.filter2D(img_in, -1, kernel=kernel)
+    def GaussianKernel2D(l, mu=0, alpha=1, sigma=1):
+        axis_line = np.arange(-l // 2 + 1, l // 2 + 1)
+        xx, yy = np.meshgrid(axis_line, axis_line)
+
+        kernel = mu + alpha * np.exp(- (xx ** 2 + yy ** 2) / sigma ** 2)
+        return kernel / np.sum(kernel)
 
     @staticmethod
-    def blur3d(img_in, kernel):
-        return convolve(img_in, kernel, mode='same')
+    def convolve(img_in, kernel, mode='same'):
+        return convolve(img_in, kernel, mode=mode)
 
     def gen_psf_kernel(self, psf_dim):
         psf_z, psf_x, psf_y = self.psf_kernel_size
@@ -227,12 +241,7 @@ class BlurPreprocessing(object):
 
     def __call__(self, img_in, psf_dim='zxy', return_kernel=False):
         psf_kernel = self.gen_psf_kernel(psf_dim=psf_dim)
-        if len(psf_dim) == 2:
-            img_result = self.blur2d(img_in, psf_kernel)
-        elif len(psf_dim) == 3:
-            img_result = self.blur3d(img_in, psf_kernel)
-        else:
-            img_result = None
+        img_result = self.convolve(img_in, psf_kernel)
 
         return (img_result, psf_kernel) if return_kernel else img_result
 

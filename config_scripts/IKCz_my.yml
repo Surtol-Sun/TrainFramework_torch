@@ -5,19 +5,19 @@
 
 device: 'cuda:0'                 # 'cpu' when cuda not available, else 'cuda:0'
 model_config:
-  model_name: 'IKC'          # Name of the model
+  model_name: 'unet2d_gan'          # Name of the model
   checkpoint_path: null         # Path to load from saved checkpoints. Enter 'null' when train from scratch
 dataset_config:
   loader_name: 'dataset_mydatabase_IKCz'      # Name of the dataset loader
 
   # Below are self-defined parameters used by 'cifar10'
-  #dataset_path: 'E:\20211209Skin'
+#  dataset_path: 'E:\00000000Scan200nm'
   dataset_path: '/home/yxsun/win_data/00000000Scan200nm'
-  data_out_shape: [3, 128, 128]   # [z, x, y]
+  data_out_shape: [4, 256, 256]   # [z, x, y]
   train_batch_size: 8
   val_batch_size: 1
 train_config:
-  strategy_name: 'TrainIKCz'   # Strategy for training
+  strategy_name: 'TrainIKCz_my'   # Strategy for training
 
   # Below are self-defined parameters used by 'regular'
   max_epoch: 1000              # Maximum epoch

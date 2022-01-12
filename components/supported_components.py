@@ -10,12 +10,12 @@ supported_model_dict = {
         n_classes=1,
     ),
     'unet2d_gan': UNet_Gan(
-        in_channels=2,
-        out_channels=1,
+        in_channels=4,
+        out_channels=4,
     ),
     'unet3d': UNet3D(
-        in_channels=1,
-        out_channels=1,
+        in_channels=3,
+        out_channels=3,
         is_segmentation=False,
     ),
     'TSCNetStep2': TSCNetStep2(
@@ -54,12 +54,14 @@ from components.train_strategy.train_strategy_TSCNet import TrainTSCNet
 from components.train_strategy.train_strategy_TSCNet_pre import TrainTSCNet_pre
 from components.train_strategy.train_strategy_IKC import TrainIKC
 from components.train_strategy.train_strategy_IKCz import TrainIKCz
+from components.train_strategy.train_strategy_IKCz_my import TrainIKCz_my
 supported_training_strategy_dict = {
     'regular': RegularTrain,
     'TrainTSCNet': TrainTSCNet,
     'TrainTSCNet_pre': TrainTSCNet_pre,
     'TrainIKC': TrainIKC,
     'TrainIKCz': TrainIKCz,
+    'TrainIKCz_my': TrainIKCz_my,
 }
 
 

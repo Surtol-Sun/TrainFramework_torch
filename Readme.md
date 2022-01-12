@@ -80,6 +80,6 @@ All your configurations can be summarize in one `yaml` file, so that you can cha
 | UNet       |                                             | 2D UNet      | $[B, C, H, W]$    | $[B, O, H, W]$    |
 | UNet_Gan   |                                             | 2D UNet Gan  | $[B, C, H, W]$    |                   |
 | UNet3D     | $S = Image \ Stack \ Num, where \  S \ge 8$ | 3D UNet      | $[B, C, H, W, S]$ | $[B, O, H, W, S]$ |
-|            |                                             |              |                   |                   |
+| IKC.SFTMD  | $S = Image \ Stack \ Num$                   | SFTMD        | $[B, S, H, W]$    | $[B, S, H, W]$    |
 |            |                                             |              |                   |                   |
 
