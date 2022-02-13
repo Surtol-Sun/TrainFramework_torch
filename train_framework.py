@@ -1,3 +1,4 @@
+import traceback
 import torch
 import argparse
 
@@ -48,7 +49,7 @@ def main():
         train_strategy.train()
         try:
             train_strategy.train()
-        except RuntimeError as e:
+        except Exception as e:
             train_successfully = False
             if 'CUDA out of memory' in str(e):
                 train_batch_size = config['dataset_config']['train_batch_size']
@@ -60,8 +61,7 @@ def main():
                     print_log('Failed, no enough CUDA memory')
                     break
             else:
-                print_log(f'Unexpected error:')
-                print_log(f'{str(e)}')
+                print_log(f'Unexpected error: {traceback.print_exc()}')
                 break
 
         if train_successfully:
