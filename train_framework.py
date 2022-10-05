@@ -46,7 +46,6 @@ def main():
 
         # Train -------------------------------------------------------------------------------------
         train_successfully = True
-        train_strategy.train()
         try:
             train_strategy.train()
         except Exception as e:
