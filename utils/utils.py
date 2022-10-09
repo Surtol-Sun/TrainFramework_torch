@@ -82,16 +82,18 @@ class AverageMeter(object):
         self.avg = self.sum / self.count
 
 
-def _normalization(img_in, dtype=None):
-    if dtype is None:
-        img_in_type = img_in.dtype
-    else:
-        img_in_type = dtype
+def _normalization(img_in, dtype=None, max_val=None, min_val=None):
+    img_in_type = img_in.dtype if dtype is None else dtype
     img_in = img_in.astype(np.float32)
-    if np.max(img_in) - np.min(img_in):
-        img_out = (img_in - np.min(img_in)) / (np.max(img_in) - np.min(img_in))
+
+    max_val = np.max(img_in) if max_val is None else max_val
+    min_val = np.min(img_in) if min_val is None else min_val
+    img_in = np.clip(img_in, a_min=min_val, a_max=max_val)
+
+    if max_val - min_val > 0:
+        img_out = (img_in - min_val) / (max_val - min_val)
     else:
-        img_out = img_in - np.min(img_in)
+        img_out = img_in - min_val
 
     # print(f'Normalized image saved as type {img_in_type}, range 0-1')
     if img_in_type == np.float or img_in_type == np.float16 or img_in_type == np.float32 or img_in_type == np.float64:
